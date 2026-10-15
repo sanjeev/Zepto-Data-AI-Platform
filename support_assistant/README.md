@@ -96,6 +96,20 @@ docker run --rm -p 7860:7860 zepto-support
 curl -s -X POST localhost:7860/ask -H 'Content-Type: application/json' -d '{"query": "Can I cancel after packing?"}'
 ```
 
+**Verified locally** (Docker 29 via Colima on Apple Silicon). `docker build` succeeded, producing a 2.7 GB image.
+`docker run -p 7860:7860 zepto-support` served `POST /ask` with `MOCK_LLM` at its default:
+
+```bash
+$ curl -s -X POST localhost:7860/ask -H 'Content-Type: application/json' -d '{"query": "Can I cancel my order after it has been packed?"}'
+{"answer":"Based on the retrieved context: Orders can be cancelled free of cost any time before the order status changes to 'Packed', typically within the first 2 minutes of placing the order. Once an order has been packed, it can no longer be...","sources":["doc_05_chunk_0","doc_02_chunk_0","doc_06_chunk_0"],"confidence":1.0}
+
+$ curl -s -X POST localhost:7860/ask -H 'Content-Type: application/json' -d '{"query": "What is the capital of France?"}'
+{"answer":"I can only answer questions about Zepto policies right now.","sources":[],"confidence":1.0}
+```
+
+The container also answers correctly when started with `--network none`, which confirms it needs no network
+access at runtime.
+
 The image installs CPU-only PyTorch (about 2 GB smaller than the default CUDA wheel). At build time it runs
 `python ingest.py`, so the MiniLM model and the ChromaDB index are baked into the image. It then sets
 `HF_HUB_OFFLINE=1` and `MOCK_LLM=1`, so the running container needs no network access. It runs as a non-root
