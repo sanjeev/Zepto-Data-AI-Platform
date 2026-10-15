@@ -1,0 +1,115 @@
+== 1. Scraping books.toscrape.com
+Scraped  32 books from 'Mystery'
+Scraped  26 books from 'Historical Fiction'
+Scraped  16 books from 'Science Fiction'
+Scraped  11 books from 'Travel'
+== 2-3. Cleaning + fixed-rate INR conversion (1 GBP = 105.50 INR)
+Cleaning: dropped 0 row(s) with unparseable text/stock fields; median-imputed 0 price(s) and 0 rating(s)
+title         string
+category      string
+price_gbp    float64
+price_inr    float64
+rating         int64
+in_stock        bool
+== 4. Loading SQLite: books.db
+== 5. Running SQL queries
+
+-- q1_top_expensive_in_stock: SELECT / WHERE / ORDER BY / LIMIT -- 10 most expensive in-stock books
+ book_id                                                                  title  price_gbp  price_inr  rating
+      15                                          Boar Island (Anna Pigeon #19)      59.48    6275.14       3
+      28 The No. 1 Ladies' Detective Agency (No. 1 Ladies' Detective Agency #1)      57.70    6087.35       4
+      82                                       A Year in Provence (Provence #1)      56.88    6000.84       4
+       3                                                    The Past Never Ends      56.50    5960.75       4
+      50                                       The Last Painting of Sara de Vos      55.55    5860.52       2
+      35                                A Flight of Arrows (The Pathfinders #2)      55.53    5858.42       5
+      70                                                         Dune (Dune #1)      54.86    5787.73       1
+      12                  Murder at the 42nd Street Library (Raymond Ambler #1)      54.36    5734.98       4
+       6                                         The Last Mile (Amos Decker #2)      54.21    5719.16       2
+      32                                    1st to Die (Women's Murder Club #1)      53.98    5694.89       1
+
+-- q2_distinct_ratings: DISTINCT / ORDER BY -- which star ratings actually occur
+ rating
+      1
+      2
+      3
+      4
+      5
+
+-- q3_price_between: BETWEEN / ORDER BY -- books priced between GBP 20 and GBP 30
+ book_id                                                                                             title  price_gbp  rating
+      31                                                              Blood Defense (Samantha Brinkman #1)      20.30       3
+      40                                                                              Love, Lies and Spies      20.55       2
+      53                                                                            Between Shades of Gray      20.79       5
+      20                                                  Delivering the Truth (Quaker Midwife Mystery #1)      20.89       4
+      48                                                                            Voyager (Outlander #3)      21.07       5
+      65                                                                                             Arena      21.36       4
+      23                                                                 The Silkworm (Cormoran Strike #2)      23.05       5
+      83 The Road to Little Dribbling: Adventures of an American in Britain (Notes From a Small Island #2)      23.21       1
+      27                                                               Career of Evil (Cormoran Strike #3)      24.72       2
+      21                                               The Mysterious Affair at Styles (Hercule Poirot #1)      24.80       4
+      18                                 What Happened on Beale Street (Secrets of the South Mysteries #2)      25.37       5
+      26                                                                Extreme Prey (Lucas Davenport #26)      25.40       3
+      56                                                                                          Starlark      25.83       3
+      85                                                                1,000 Places to See Before You Die      26.08       5
+      63                                                                                   Soft Apocalypse      26.12       2
+      47                                                                         Girl With a Pearl Earring      26.77       1
+      11                                                                  Poisonous (Max Revere Novels #3)      26.80       3
+      16                                                                                         The Widow      27.26       2
+      57                                                                             Lost Among the Living      27.70       4
+      38                                                                         The Marriage of Opposites      28.08       4
+      46                                                                             The Passion of Dolssa      28.32       5
+      34                         Forever and Forever: The Courtship of Henry Longfellow and Fanny Appleton      29.69       3
+
+-- q4_rating_in: IN / WHERE / ORDER BY / LIMIT -- cheapest 4- or 5-star books
+ book_id                                                             title  rating  price_gbp
+      29                                                 The Girl You Lost       5      12.29
+      58                 A Spy's Devotion (The Regency Spies of London #1)       5      16.97
+      68                                                  Ready Player One       4      19.07
+      53                                            Between Shades of Gray       5      20.79
+      20                  Delivering the Truth (Quaker Midwife Mystery #1)       4      20.89
+      48                                            Voyager (Outlander #3)       5      21.07
+      65                                                             Arena       4      21.36
+      23                                 The Silkworm (Cormoran Strike #2)       5      23.05
+      21               The Mysterious Affair at Styles (Hercule Poirot #1)       4      24.80
+      18 What Happened on Beale Street (Secrets of the South Mysteries #2)       5      25.37
+
+-- q5_join_top3_per_category: JOIN (+ window function) -- 3 highest-rated books per category (ties broken by higher price, then book_id)
+     category_name                                                                                    title  rating  price_gbp
+Historical Fiction                                                  A Flight of Arrows (The Pathfinders #2)       5      55.53
+Historical Fiction                                                                      While You Were Mine       5      41.32
+Historical Fiction                                                                             The Red Tent       5      35.66
+           Mystery                 The Bachelor Girl's Guide to Murder (Herringford and Watts Mysteries #1)       5      52.30
+           Mystery                                                   A Time of Torment (Charlie Parker #14)       5      48.35
+           Mystery                        What Happened on Beale Street (Secrets of the South Mysteries #2)       5      25.37
+   Science Fiction                                                                                     Join       5      35.67
+   Science Fiction William Shakespeare's Star Wars: Verily, A New Hope (William Shakespeare's Star Wars #4)       4      43.30
+   Science Fiction                                 Having the Barbarian's Baby (Ice Planet Barbarians #7.5)       4      34.96
+            Travel                                                       1,000 Places to See Before You Die       5      26.08
+            Travel                                                         A Year in Provence (Provence #1)       4      56.88
+            Travel                         Full Moon over Noah’s Ark: An Odyssey to Mount Ararat and Beyond       4      49.43
+
+-- q6_join_category_summary: JOIN / GROUP BY / ORDER BY -- per-category book count, average price and rating
+     category_name  n_books  avg_price_gbp  avg_price_inr  avg_rating  n_in_stock
+           Mystery       32          31.72        3346.36        2.94          32
+Historical Fiction       26          33.64        3549.47        3.23          26
+   Science Fiction       16          33.80        3566.16        2.25          16
+            Travel       11          39.79        4198.32        2.73          11
+
+== 6. pd.read_sql + pd.merge comparison
+pd.read_sql(join) == pd.merge(...) result: True
+   pd.read_sql (SQL JOIN)                                                                                                            pd.merge (pandas only)                                                                                                           
+            category_name                                                                                     title rating price_gbp          category_name                                                                                     title rating price_gbp
+0      Historical Fiction                                                   A Flight of Arrows (The Pathfinders #2)      5     55.53     Historical Fiction                                                   A Flight of Arrows (The Pathfinders #2)      5     55.53
+1      Historical Fiction                                                                       While You Were Mine      5     41.32     Historical Fiction                                                                       While You Were Mine      5     41.32
+2      Historical Fiction                                                                              The Red Tent      5     35.66     Historical Fiction                                                                              The Red Tent      5     35.66
+3                 Mystery                  The Bachelor Girl's Guide to Murder (Herringford and Watts Mysteries #1)      5     52.30                Mystery                  The Bachelor Girl's Guide to Murder (Herringford and Watts Mysteries #1)      5     52.30
+4                 Mystery                                                    A Time of Torment (Charlie Parker #14)      5     48.35                Mystery                                                    A Time of Torment (Charlie Parker #14)      5     48.35
+5                 Mystery                         What Happened on Beale Street (Secrets of the South Mysteries #2)      5     25.37                Mystery                         What Happened on Beale Street (Secrets of the South Mysteries #2)      5     25.37
+6         Science Fiction                                                                                      Join      5     35.67        Science Fiction                                                                                      Join      5     35.67
+7         Science Fiction  William Shakespeare's Star Wars: Verily, A New Hope (William Shakespeare's Star Wars #4)      4     43.30        Science Fiction  William Shakespeare's Star Wars: Verily, A New Hope (William Shakespeare's Star Wars #4)      4     43.30
+8         Science Fiction                                  Having the Barbarian's Baby (Ice Planet Barbarians #7.5)      4     34.96        Science Fiction                                  Having the Barbarian's Baby (Ice Planet Barbarians #7.5)      4     34.96
+9                  Travel                                                        1,000 Places to See Before You Die      5     26.08                 Travel                                                        1,000 Places to See Before You Die      5     26.08
+10                 Travel                                                          A Year in Provence (Provence #1)      4     56.88                 Travel                                                          A Year in Provence (Provence #1)      4     56.88
+11                 Travel                          Full Moon over Noah’s Ark: An Odyssey to Mount Ararat and Beyond      4     49.43                 Travel                          Full Moon over Noah’s Ark: An Odyssey to Mount Ararat and Beyond      4     49.43
+
+Wrote /Users/sanjeev/Projects/zepto-data-ai-platform/data_pipeline/outputs/query_results.md
