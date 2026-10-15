@@ -135,7 +135,7 @@ user (uid 1000, as Hugging Face Spaces expects) and starts
 ```
 
 1. **Ingestion** (`ingest.py`: `load_documents`, `chunk_documents`). The 8 `.txt` files are read from `docs/`.
-   Each policy is a single paragraph of about 450–550 characters, so each document becomes **one chunk**
+   Each policy is a single paragraph of 333–561 characters, so each document becomes **one chunk**
    (`doc_01_chunk_0` … `doc_08_chunk_0`) with `doc_id` and `title` metadata. Splitting further would separate
    facts that belong together, such as a fee and the order threshold it applies to.
 2. **Embedding** (`ingest.py`: `embed`, `build_index`). Each chunk is encoded locally by
